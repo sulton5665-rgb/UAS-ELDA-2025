@@ -3,25 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SPARTAN POWER MONITORING - ELDA UAS</title>
+    <title>SPARTAN POWER MONITORING - ANCIENT FORGE</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Fjalla+One&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
-        /* --- TEMA SPARTAN (Kekuatan & Ketahanan) --- */
+        /* --- TEMA SPARTAN: ANCIENT FORGE (Baja Gelap & Emas Kusam) --- */
         :root {
-            --bg-color: #1a1a1a;        /* Abu-abu Batu Gelap */
-            --card-bg: #2b2b2b;         /* Batu Coklat Gelap */
-            --spartan-red: #8b0000;     /* Merah Spartan (Merah Marun Gelap) */
-            --spartan-gold: #c7a44f;    /* Emas/Perunggu Kusam */
-            --spartan-accent: #ff4500;  /* Oranye Merah (Api) */
-            --text-light: #e0e0e0;      /* Teks Cerah */
-            --shadow-power: 0 0 10px rgba(255, 69, 0, 0.7); /* Efek Api */
+            --bg-color: #0d0d0d;        /* Background lebih gelap */
+            --card-bg: #1e1e1e;         /* Baja Gelap */
+            --spartan-red: #800000;     /* Merah Marun Tua (Darah) */
+            --spartan-gold: #aa8844;    /* Emas Kusam/Karat */
+            --spartan-accent: #e55c00;  /* Oranye Karat (Suhu Tinggi) */
+            --text-light: #cccccc;      /* Teks Cerah */
+            --shadow-power: 0 0 10px rgba(229, 92, 0, 0.5); /* Efek Panas */
         }
 
         body {
-            font-family: 'Roboto Mono', monospace; /* Font teknis untuk detail */
+            font-family: 'Roboto Mono', monospace;
             background-color: var(--bg-color);
             color: var(--text-light);
             margin: 0;
@@ -35,26 +36,27 @@
         header {
             text-align: center;
             margin-bottom: 30px;
-            border-bottom: 3px solid var(--spartan-red); /* Garis Merah Kuat */
+            /* Border solid dihilangkan, diganti shadow */
             width: 100%;
             max-width: 1000px;
             padding-bottom: 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            box-shadow: 0 4px 0 0 var(--spartan-red); /* Garis bawah yang kuat */
         }
 
         h1 {
             margin: 0;
-            font-family: 'Fjalla One', sans-serif; /* Font Judul Tegas */
-            font-size: 2rem;
+            font-family: 'Fjalla One', sans-serif;
+            font-size: 2.2rem; /* Sedikit lebih besar */
             text-transform: uppercase;
-            letter-spacing: 4px;
+            letter-spacing: 5px;
             color: var(--spartan-gold);
-            text-shadow: 0 0 5px rgba(199, 164, 79, 0.5);
+            text-shadow: 0 0 8px rgba(170, 136, 68, 0.7);
         }
         
-        /* Status - PENGUASAAN */
+        /* Status - READY FOR BATTLE */
         .status-container {
             font-size: 0.9rem;
             display: flex;
@@ -62,9 +64,9 @@
             gap: 10px;
         }
         .status-dot {
-            height: 14px;
-            width: 14px;
-            background-color: var(--spartan-accent); /* Api */
+            height: 16px; /* Lebih besar */
+            width: 16px;
+            background-color: var(--spartan-accent);
             border-radius: 50%;
             display: inline-block;
             box-shadow: var(--shadow-power);
@@ -72,6 +74,7 @@
         .status-text { 
             color: var(--spartan-accent);
             font-weight: bold;
+            letter-spacing: 1px;
         }
 
         /* --- GRID LAYOUT --- */
@@ -86,65 +89,69 @@
 
         .card {
             background-color: var(--card-bg);
-            border: 2px solid var(--spartan-red); /* Border Merah khas Spartan */
-            border-radius: 0; /* Bentuk kotak tegas */
+            /* Border diganti dengan box-shadow kuat dan outline tipis */
+            border: 1px solid #333; 
+            border-radius: 4px; /* Sudut sedikit membulat */
             padding: 20px;
             text-align: center;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.7); /* Bayangan dalam */
-            transition: border-color 0.3s;
+            box-shadow: 0 0 15px rgba(0,0,0,0.9), inset 0 0 5px rgba(255, 255, 255, 0.05); /* Efek baja tebal */
+            transition: all 0.3s;
         }
 
-        /* Efek hover Spartan */
+        /* Efek hover Spartan - fokus dan panas */
         .card:hover {
-            border-color: var(--spartan-gold);
-            transform: translateY(-3px);
+            border-color: var(--spartan-accent);
+            box-shadow: 0 0 20px var(--spartan-accent), inset 0 0 5px var(--spartan-accent);
+            transform: scale(1.02);
         }
 
         .card h3 {
             margin: 0 0 10px 0;
-            font-size: 0.8rem;
-            color: var(--spartan-gold);
-            letter-spacing: 2px;
+            font-size: 0.9rem; /* Sedikit lebih besar */
+            color: var(--text-light);
+            letter-spacing: 1px;
             text-transform: uppercase;
-            border-bottom: 1px dashed #555;
-            padding-bottom: 5px;
+            border-bottom: 2px solid var(--spartan-gold); /* Garis Emas tegas */
+            padding-bottom: 8px;
+            font-family: 'Fjalla One', sans-serif;
         }
 
         /* Font data digital */
         .value-display {
             font-family: 'Roboto Mono', monospace;
-            font-size: 3rem; /* Lebih besar */
-            margin: 10px 0;
+            font-size: 3.2rem; /* Paling besar */
+            margin: 15px 0;
             font-weight: 700;
-            letter-spacing: 3px;
+            letter-spacing: 4px;
             position: relative;
         }
 
         .unit {
-            font-size: 0.9rem;
-            color: #aaa;
+            font-size: 1rem;
+            color: #888;
             font-weight: bold;
+            text-transform: uppercase;
         }
 
-        /* Warna per parameter (Gunakan variasi Merah/Emas) */
-        #val-voltage { color: var(--spartan-gold); text-shadow: 0 0 8px rgba(199, 164, 79, 0.8); }
-        #val-current { color: var(--spartan-accent); text-shadow: 0 0 8px rgba(255, 69, 0, 0.8); }
-        #val-power   { color: var(--spartan-red); text-shadow: 0 0 8px rgba(139, 0, 0, 0.8); }
-        #val-energy  { color: var(--text-light); text-shadow: 0 0 5px rgba(224, 224, 224, 0.5); }
-        #val-frek    { color: var(--spartan-gold); }
-        #val-pf      { color: var(--spartan-accent); }
+        /* Warna per parameter */
+        #val-voltage { color: var(--spartan-gold); text-shadow: 0 0 10px rgba(170, 136, 68, 1); }
+        #val-current { color: var(--spartan-accent); text-shadow: 0 0 10px rgba(229, 92, 0, 1); }
+        #val-power   { color: var(--spartan-red); text-shadow: 0 0 10px rgba(128, 0, 0, 1); }
+        #val-energy  { color: var(--text-light); text-shadow: 0 0 5px rgba(204, 204, 204, 0.5); }
+        #val-frek    { color: var(--spartan-gold); }
+        #val-pf      { color: var(--spartan-accent); }
         
         /* --- CHART CONTAINER --- */
         .chart-wrapper {
             width: 100%;
             max-width: 1000px;
             background-color: var(--card-bg);
-            border: 2px solid var(--spartan-red);
-            border-radius: 0;
-            padding: 15px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.9);
         }
         canvas {
             max-height: 350px;
@@ -152,55 +159,56 @@
 
         /* Mobile tweaks */
         @media (max-width: 600px) {
-            .value-display { font-size: 2.2rem; }
-            h1 { font-size: 1.5rem; letter-spacing: 2px;}
+            .value-display { font-size: 2rem; }
+            h1 { font-size: 1.4rem; letter-spacing: 2px;}
             header { flex-direction: column; gap: 10px; }
+            .grid-container { gap: 10px; }
         }
     </style>
 </head>
 <body>
 
     <header>
-        <h1><i class="fas fa-helmet-battle"></i> KEKUATAN & DOMINASI</h1>
+        <h1><i class="fas fa-hammer"></i> ANCIENT FORGE POWER GRID</h1>
         <div class="status-container">
             <span class="status-dot" id="dot"></span>
-            <span class="status-text" id="status-text">KEADAAN SIAGA</span>
+            <span class="status-text" id="status-text">SIAGA TEMPA BAJA</span>
         </div>
     </header>
 
     <div class="grid-container">
         <div class="card">
-            <h3>Tegangan (SHIELD)</h3>
+            <h3>Tegangan (SHIELD INTEGRITY)</h3>
             <div class="value-display" id="val-voltage">220.5</div>
             <div class="unit">VOLT (V)</div>
         </div>
         
         <div class="card">
-            <h3>Arus (BLADE)</h3>
+            <h3>Arus (FORGE INTENSITY)</h3>
             <div class="value-display" id="val-current">1.500</div>
             <div class="unit">AMPERE (A)</div>
         </div>
 
         <div class="card">
-            <h3>Daya Aktif (STRENGTH)</h3>
+            <h3>Daya Aktif (HAMMER STRENGTH)</h3>
             <div class="value-display" id="val-power">330.8</div>
             <div class="unit">WATT (W)</div>
         </div>
 
         <div class="card">
-            <h3>Energi Total (WAR CHEST)</h3>
+            <h3>Energi Total (IRON RESERVE)</h3>
             <div class="value-display" id="val-energy">125.450</div>
             <div class="unit">kWh</div>
         </div>
 
         <div class="card">
-            <h3>Frekuensi (RHYTHM)</h3>
+            <h3>Frekuensi (BELLOWS PULSE)</h3>
             <div class="value-display" id="val-frek">50.0</div>
             <div class="unit">HERTZ (Hz)</div>
         </div>
 
         <div class="card">
-            <h3>Power Factor (PRECISION)</h3>
+            <h3>Power Factor (STRIKE PRECISION)</h3>
             <div class="value-display" id="val-pf">0.95</div>
             <div class="unit">Cos Phi</div>
         </div>
@@ -212,12 +220,13 @@
 
     <script>
         // --- KONFIGURASI GRAFIK (CHART.JS) ---
+        // Logika di bagian ini TIDAK BERUBAH dari kode asli Anda.
         const ctx = document.getElementById('powerChart').getContext('2d');
         
         // Setup Gradient Warna (Api/Power)
         let gradient = ctx.createLinearGradient(0, 0, 0, 400);
-        gradient.addColorStop(0, 'rgba(139, 0, 0, 0.5)'); // Merah Spartan Transparan
-        gradient.addColorStop(1, 'rgba(139, 0, 0, 0)');
+        gradient.addColorStop(0, 'rgba(128, 0, 0, 0.5)'); // Merah Marun Tua Transparan
+        gradient.addColorStop(1, 'rgba(128, 0, 0, 0)');
 
         const maxDataPoints = 30; 
         let totalEnergyKWH = 125.450; 
@@ -229,11 +238,11 @@
                 datasets: [{
                     label: 'Kekuatan Daya (WATT)',
                     data: [], 
-                    borderColor: '#ff4500', // Garis Oranye Api
+                    borderColor: '#e55c00', // Garis Oranye Karat/Panas
                     backgroundColor: gradient,
                     borderWidth: 2,
                     pointRadius: 4,
-                    pointBackgroundColor: '#c7a44f', // Titik Emas
+                    pointBackgroundColor: '#aa8844', // Titik Emas Kusam
                     fill: true,
                     tension: 0.3
                 }]
@@ -256,12 +265,12 @@
                     }
                 },
                 plugins: {
-                    legend: { labels: { color: '#e0e0e0' } }
+                    legend: { labels: { color: '#cccccc' } }
                 }
             }
         });
 
-        // --- LOGIKA SIMULASI DATA ---
+        // --- LOGIKA SIMULASI DATA (TIDAK BERUBAH) ---
         
         function generateSimulationData() {
             // Tegangan stabil di sekitar 220V
