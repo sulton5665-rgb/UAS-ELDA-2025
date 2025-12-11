@@ -3,28 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SPARTAN POWER MONITORING - ANCIENT FORGE</title>
+    <title>Dashboard UAS - ELDA BAGAS</title>
     
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Fjalla+One&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
     <style>
-        /* --- TEMA SPARTAN: ANCIENT FORGE (Baja Gelap & Emas Kusam) --- */
+        /* --- CSS MODERN LIGHT THEME --- */
         :root {
-            --bg-color: #0d0d0d;        /* Background lebih gelap */
-            --card-bg: #1e1e1e;         /* Baja Gelap */
-            --spartan-red: #800000;     /* Merah Marun Tua (Darah) */
-            --spartan-gold: #aa8844;    /* Emas Kusam/Karat */
-            --spartan-accent: #e55c00;  /* Oranye Karat (Suhu Tinggi) */
-            --text-light: #cccccc;      /* Teks Cerah */
-            --shadow-power: 0 0 10px rgba(229, 92, 0, 0.5); /* Efek Panas */
+            --bg-color: #f4f7fe; /* Biru keabuan sangat muda */
+            --card-bg: #ffffff;
+            --text-primary: #2b3674;
+            --text-secondary: #a3aed0;
+            --accent-blue: #4318ff;
+            --accent-green: #05cd99;
+            --accent-orange: #ffad0e;
+            --accent-red: #e31a1a;
+            --shadow: 0px 18px 40px rgba(112, 144, 176, 0.12);
         }
 
         body {
-            font-family: 'Roboto Mono', monospace;
+            font-family: 'Poppins', sans-serif;
             background-color: var(--bg-color);
-            color: var(--text-light);
+            color: var(--text-primary);
             margin: 0;
             padding: 20px;
             display: flex;
@@ -33,306 +35,343 @@
             min-height: 100vh;
         }
 
+        /* --- HEADER STYLE --- */
         header {
-            text-align: center;
-            margin-bottom: 30px;
-            /* Border solid dihilangkan, diganti shadow */
             width: 100%;
-            max-width: 1000px;
-            padding-bottom: 15px;
+            max-width: 1100px;
+            background: var(--card-bg);
+            padding: 20px 30px;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 4px 0 0 var(--spartan-red); /* Garis bawah yang kuat */
+            margin-bottom: 30px;
+            box-sizing: border-box;
         }
 
-        h1 {
+        .header-text h1 {
             margin: 0;
-            font-family: 'Fjalla One', sans-serif;
-            font-size: 2.2rem; /* Sedikit lebih besar */
-            text-transform: uppercase;
-            letter-spacing: 5px;
-            color: var(--spartan-gold);
-            text-shadow: 0 0 8px rgba(170, 136, 68, 0.7);
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-primary);
         }
         
-        /* Status - READY FOR BATTLE */
-        .status-container {
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .status-dot {
-            height: 16px; /* Lebih besar */
-            width: 16px;
-            background-color: var(--spartan-accent);
-            border-radius: 50%;
-            display: inline-block;
-            box-shadow: var(--shadow-power);
-        }
-        .status-text { 
-            color: var(--spartan-accent);
-            font-weight: bold;
-            letter-spacing: 1px;
+        .header-text p {
+            margin: 5px 0 0 0;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
         }
 
-        /* --- GRID LAYOUT --- */
+        /* Status Badge */
+        .status-badge {
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background-color: #f0f0f0;
+            color: #777;
+            transition: all 0.3s ease;
+        }
+        
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #ccc;
+        }
+
+        /* --- GRID CARDS --- */
         .grid-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 25px;
             width: 100%;
-            max-width: 1000px;
+            max-width: 1100px;
             margin-bottom: 30px;
         }
 
         .card {
             background-color: var(--card-bg);
-            /* Border diganti dengan box-shadow kuat dan outline tipis */
-            border: 1px solid #333; 
-            border-radius: 4px; /* Sudut sedikit membulat */
-            padding: 20px;
-            text-align: center;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            transition: transform 0.2s;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 0 15px rgba(0,0,0,0.9), inset 0 0 5px rgba(255, 255, 255, 0.05); /* Efek baja tebal */
-            transition: all 0.3s;
+            border-left: 5px solid transparent; /* Untuk aksen warna */
         }
 
-        /* Efek hover Spartan - fokus dan panas */
         .card:hover {
-            border-color: var(--spartan-accent);
-            box-shadow: 0 0 20px var(--spartan-accent), inset 0 0 5px var(--spartan-accent);
-            transform: scale(1.02);
+            transform: translateY(-5px);
+        }
+
+        /* Icon Container (Lingkaran kecil di pojok) */
+        .card-icon {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            background: #f4f7fe;
+            color: var(--accent-blue);
         }
 
         .card h3 {
-            margin: 0 0 10px 0;
-            font-size: 0.9rem; /* Sedikit lebih besar */
-            color: var(--text-light);
-            letter-spacing: 1px;
+            margin: 0;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-weight: 500;
             text-transform: uppercase;
-            border-bottom: 2px solid var(--spartan-gold); /* Garis Emas tegas */
-            padding-bottom: 8px;
-            font-family: 'Fjalla One', sans-serif;
         }
 
-        /* Font data digital */
         .value-display {
-            font-family: 'Roboto Mono', monospace;
-            font-size: 3.2rem; /* Paling besar */
-            margin: 15px 0;
+            font-size: 2.2rem;
             font-weight: 700;
-            letter-spacing: 4px;
-            position: relative;
+            color: var(--text-primary);
+            margin: 10px 0 5px 0;
         }
 
         .unit {
-            font-size: 1rem;
-            color: #888;
-            font-weight: bold;
-            text-transform: uppercase;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 500;
         }
 
-        /* Warna per parameter */
-        #val-voltage { color: var(--spartan-gold); text-shadow: 0 0 10px rgba(170, 136, 68, 1); }
-        #val-current { color: var(--spartan-accent); text-shadow: 0 0 10px rgba(229, 92, 0, 1); }
-        #val-power   { color: var(--spartan-red); text-shadow: 0 0 10px rgba(128, 0, 0, 1); }
-        #val-energy  { color: var(--text-light); text-shadow: 0 0 5px rgba(204, 204, 204, 0.5); }
-        #val-frek    { color: var(--spartan-gold); }
-        #val-pf      { color: var(--spartan-accent); }
-        
-        /* --- CHART CONTAINER --- */
+        /* Warna Aksen Spesifik per Kartu */
+        .card.volt { border-left-color: var(--accent-blue); }
+        .card.amp { border-left-color: var(--accent-orange); }
+        .card.watt { border-left-color: var(--accent-red); }
+        .card.kwh { border-left-color: var(--accent-green); }
+
+        /* --- CHART SECTION --- */
         .chart-wrapper {
             width: 100%;
-            max-width: 1000px;
-            background-color: var(--card-bg);
-            border: 1px solid #333;
-            border-radius: 4px;
-            padding: 20px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.9);
-        }
-        canvas {
-            max-height: 350px;
+            max-width: 1100px;
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: var(--shadow);
+            box-sizing: border-box;
         }
 
-        /* Mobile tweaks */
+        .chart-header {
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        /* Mobile Adjustments */
         @media (max-width: 600px) {
-            .value-display { font-size: 2rem; }
-            h1 { font-size: 1.4rem; letter-spacing: 2px;}
-            header { flex-direction: column; gap: 10px; }
-            .grid-container { gap: 10px; }
+            header { flex-direction: column; gap: 15px; text-align: center; }
+            .grid-container { grid-template-columns: 1fr 1fr; }
+            .value-display { font-size: 1.8rem; }
         }
     </style>
 </head>
 <body>
 
     <header>
-        <h1><i class="fas fa-hammer"></i> ANCIENT FORGE POWER GRID</h1>
-        <div class="status-container">
-            <span class="status-dot" id="dot"></span>
-            <span class="status-text" id="status-text">SIAGA TEMPA BAJA</span>
+        <div class="header-text">
+            <h1>Monitoring Listrik - ELDA BAGAS</h1>
+            <p>Realtime PZEM-017 Sensor Data</p>
+        </div>
+        <div class="status-badge" id="status-badge">
+            <div class="status-dot" id="dot"></div>
+            <span id="status-text">Connecting...</span>
         </div>
     </header>
 
     <div class="grid-container">
-        <div class="card">
-            <h3>Tegangan (SHIELD INTEGRITY)</h3>
-            <div class="value-display" id="val-voltage">220.5</div>
-            <div class="unit">VOLT (V)</div>
+        <div class="card volt">
+            <div class="card-icon" style="color: #4318ff; background: #eff4fb;">⚡</div>
+            <h3>Tegangan</h3>
+            <div class="value-display" id="val-voltage">000.0</div>
+            <div class="unit">Volt (V)</div>
         </div>
         
-        <div class="card">
-            <h3>Arus (FORGE INTENSITY)</h3>
-            <div class="value-display" id="val-current">1.500</div>
-            <div class="unit">AMPERE (A)</div>
+        <div class="card amp">
+            <div class="card-icon" style="color: #ffad0e; background: #fff7e6;">〰️</div>
+            <h3>Arus Listrik</h3>
+            <div class="value-display" id="val-current">0.000</div>
+            <div class="unit">Ampere (A)</div>
+        </div>
+
+        <div class="card watt">
+            <div class="card-icon" style="color: #e31a1a; background: #ffeeee;">💡</div>
+            <h3>Daya Aktif</h3>
+            <div class="value-display" id="val-power">0000</div>
+            <div class="unit">Watt (W)</div>
+        </div>
+
+        <div class="card kwh">
+            <div class="card-icon" style="color: #05cd99; background: #e6fff9;">🔋</div>
+            <h3>Total Energi</h3>
+            <div class="value-display" id="val-energy">0000</div>
+            <div class="unit">Kilowatt Hour (kWh)</div>
         </div>
 
         <div class="card">
-            <h3>Daya Aktif (HAMMER STRENGTH)</h3>
-            <div class="value-display" id="val-power">330.8</div>
-            <div class="unit">WATT (W)</div>
+            <h3>Frekuensi</h3>
+            <div class="value-display" id="val-frek">00.0</div>
+            <div class="unit">Hertz (Hz)</div>
         </div>
 
         <div class="card">
-            <h3>Energi Total (IRON RESERVE)</h3>
-            <div class="value-display" id="val-energy">125.450</div>
-            <div class="unit">kWh</div>
-        </div>
-
-        <div class="card">
-            <h3>Frekuensi (BELLOWS PULSE)</h3>
-            <div class="value-display" id="val-frek">50.0</div>
-            <div class="unit">HERTZ (Hz)</div>
-        </div>
-
-        <div class="card">
-            <h3>Power Factor (STRIKE PRECISION)</h3>
-            <div class="value-display" id="val-pf">0.95</div>
+            <h3>Power Factor</h3>
+            <div class="value-display" id="val-pf">0.00</div>
             <div class="unit">Cos Phi</div>
         </div>
     </div>
 
     <div class="chart-wrapper">
+        <div class="chart-header">Grafik Konsumsi Daya (Realtime)</div>
         <canvas id="powerChart"></canvas>
     </div>
 
     <script>
+        // --- KONFIGURASI MQTT ---
+        // (SAMA SEPERTI SEBELUMNYA)
+        const broker = "broker.emqx.io";
+        const port = 8084; // WSS Port
+        const topic = "iot/pzem/data"; 
+        const clientID = "web_clean_" + Math.random().toString(16).substr(2, 8);
+        const client = new Paho.MQTT.Client(broker, port, clientID);
+
         // --- KONFIGURASI GRAFIK (CHART.JS) ---
-        // Logika di bagian ini TIDAK BERUBAH dari kode asli Anda.
+        // (Warna diubah agar cocok dengan tema Putih)
         const ctx = document.getElementById('powerChart').getContext('2d');
         
-        // Setup Gradient Warna (Api/Power)
+        // Gradient Biru Profesional
         let gradient = ctx.createLinearGradient(0, 0, 0, 400);
-        gradient.addColorStop(0, 'rgba(128, 0, 0, 0.5)'); // Merah Marun Tua Transparan
-        gradient.addColorStop(1, 'rgba(128, 0, 0, 0)');
+        gradient.addColorStop(0, 'rgba(67, 24, 255, 0.4)'); // Biru
+        gradient.addColorStop(1, 'rgba(67, 24, 255, 0.0)');
 
         const maxDataPoints = 30; 
-        let totalEnergyKWH = 125.450; 
-
+        
         const powerChart = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: [], 
                 datasets: [{
-                    label: 'Kekuatan Daya (WATT)',
+                    label: 'Daya (Watt)',
                     data: [], 
-                    borderColor: '#e55c00', // Garis Oranye Karat/Panas
+                    borderColor: '#4318ff', // Garis biru
                     backgroundColor: gradient,
-                    borderWidth: 2,
-                    pointRadius: 4,
-                    pointBackgroundColor: '#aa8844', // Titik Emas Kusam
+                    borderWidth: 3,
+                    pointRadius: 0, // Hilangkan titik agar clean
+                    pointHoverRadius: 6,
                     fill: true,
-                    tension: 0.3
+                    tension: 0.4 
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                animation: false,
+                animation: false, 
+                plugins: {
+                    legend: { display: false } // Sembunyikan legend agar minimalis
+                },
                 scales: {
                     x: { 
                         display: false,
-                        grid: { display: false },
-                        border: { color: '#555' }
+                        grid: { display: false }
                     },
                     y: {
-                        grid: { color: '#444' },
-                        ticks: { color: '#aaa' },
-                        min: 0,
-                        border: { color: '#555' }
+                        grid: { borderDash: [5, 5], color: '#e0e0e0' }, // Grid putus-putus halus
+                        ticks: { color: '#a3aed0' }
                     }
-                },
-                plugins: {
-                    legend: { labels: { color: '#cccccc' } }
                 }
             }
         });
 
-        // --- LOGIKA SIMULASI DATA (TIDAK BERUBAH) ---
-        
-        function generateSimulationData() {
-            // Tegangan stabil di sekitar 220V
-            const voltage = 220 + (Math.random() * 4) - 2; 
-            // Arus berfluktuasi dari 0.1A hingga 3A
-            const current = 1.0 + (Math.random() * 2); 
-            // PF
-            const pf = 0.85 + (Math.random() * 0.15); 
-            // Daya = V * I * PF
-            const power = voltage * current * pf; 
-            // Frekuensi stabil
-            const frequency = 50.0 + (Math.random() * 0.2) - 0.1;
+        // --- LOGIKA MQTT (TIDAK DIUBAH) ---
 
-            // Simulasi penambahan energi (diasumsikan interval 5 detik)
-            const energyIncrement = (power * 5) / 3600 / 1000;
-            totalEnergyKWH += energyIncrement;
+        function updateStatus(isConnected) {
+            const badge = document.getElementById("status-badge");
+            const dot = document.getElementById("dot");
+            const text = document.getElementById("status-text");
 
-            return {
-                tegangan: voltage,
-                arus: current,
-                daya: power,
-                energi: totalEnergyKWH,
-                frekuensi: frequency,
-                pf: pf
-            };
+            if (isConnected) {
+                badge.style.backgroundColor = "#e6fff9"; // Hijau muda background
+                badge.style.color = "#05cd99"; // Hijau teks
+                dot.style.backgroundColor = "#05cd99";
+                text.innerText = "Connected Online";
+            } else {
+                badge.style.backgroundColor = "#ffeeee"; // Merah muda background
+                badge.style.color = "#e31a1a"; // Merah teks
+                dot.style.backgroundColor = "#e31a1a";
+                text.innerText = "Disconnected";
+            }
         }
 
-        function updateDashboard() {
-            const data = generateSimulationData();
+        client.onConnectionLost = function (responseObject) {
+            updateStatus(false);
+            console.log("Koneksi hilang: " + responseObject.errorMessage);
+            setTimeout(startConnection, 5000);
+        };
 
-            // Update Angka Digital
-            document.getElementById("val-voltage").innerText = data.tegangan.toFixed(1);
-            document.getElementById("val-current").innerText = data.arus.toFixed(3);
-            document.getElementById("val-power").innerText   = data.daya.toFixed(1);
-            document.getElementById("val-energy").innerText  = data.energi.toFixed(3);
-            document.getElementById("val-frek").innerText    = data.frekuensi.toFixed(1);
-            document.getElementById("val-pf").innerText      = data.pf.toFixed(2);
+        client.onMessageArrived = function (message) {
+            try {
+                const data = JSON.parse(message.payloadString);
+                
+                // Update Angka
+                document.getElementById("val-voltage").innerText = parseFloat(data.tegangan).toFixed(1);
+                document.getElementById("val-current").innerText = parseFloat(data.arus).toFixed(3);
+                document.getElementById("val-power").innerText   = parseFloat(data.daya).toFixed(1);
+                document.getElementById("val-energy").innerText  = parseFloat(data.energi).toFixed(3);
+                document.getElementById("val-frek").innerText    = parseFloat(data.frekuensi).toFixed(1);
+                document.getElementById("val-pf").innerText      = parseFloat(data.pf).toFixed(2);
 
-            // Update Grafik Daya
-            updateChart(data.daya);
-        }
+                // Update Grafik
+                updateChart(data.daya);
+
+            } catch (e) {
+                console.error("Error parsing data:", e);
+            }
+        };
 
         function updateChart(powerValue) {
-            const now = new Date().toLocaleTimeString('en-US', { hour12: false, second: '2-digit', minute: '2-digit' });
-
+            const now = new Date().toLocaleTimeString();
             powerChart.data.labels.push(now);
             powerChart.data.datasets[0].data.push(powerValue);
 
-            // Hapus data lama jika melebihi batas (FIFO)
             if (powerChart.data.labels.length > maxDataPoints) {
                 powerChart.data.labels.shift();
                 powerChart.data.datasets[0].data.shift();
             }
-
             powerChart.update();
         }
 
-        // Jalankan update pertama kali
-        updateDashboard(); 
-        
-        // Atur interval update simulasi (setiap 5 detik)
-        setInterval(updateDashboard, 5000); 
+        function startConnection() {
+            client.connect({
+                useSSL: true,
+                timeout: 3,
+                onSuccess: function () {
+                    updateStatus(true);
+                    client.subscribe(topic);
+                },
+                onFailure: function (e) {
+                    updateStatus(false);
+                    console.log("Gagal konek: " + e.errorMessage);
+                    setTimeout(startConnection, 5000);
+                }
+            });
+        }
+
+        startConnection();
     </script>
 </body>
 </html>
